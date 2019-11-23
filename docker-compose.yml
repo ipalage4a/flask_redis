@@ -1,8 +1,22 @@
 version: "3"
 services:
+    db:
+        image: redis:latest
+        restart: always
+        volumes:
+            - ./redis:/app/redis
+        command: redis-server /app/redis/redis.conf
+        network_mode: host
+        ports:
+            - 6379:6379
+
     app:
         build: flask/
+        volumes:
+            - ./flask:/app
         command: python app.py
         network_mode: host
         ports:
             - 5000:5000
+        depends_on:
+            - db
