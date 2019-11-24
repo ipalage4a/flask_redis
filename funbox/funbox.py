@@ -22,8 +22,8 @@ def get_domain_from_url(url):
         return urlparse(f'//{url}').netloc.replace("www.", "")
 
 def get_links_from_set(from_key, to_key):
-    if None not in [from_key, to_key]:
-        sets = [redis_client.smembers(f'time:{key}:links') for key in range(from_key, to_key)]
+    if None not in [from_key, to_key] and from_key <= to_key:
+        sets = [redis_client.smembers(f'time:{key}:links') for key in range(from_key, to_key + 1)]
         return list(reduce(lambda x, y: x.union(y), sets))
     else:
         return []
@@ -75,4 +75,4 @@ api.add_resource(VisitedLinks, '/visited_links')
 api.add_resource(VisitedDomains, '/visited_domains')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

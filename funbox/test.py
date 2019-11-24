@@ -19,6 +19,24 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
         self.assertNotEqual([b'test', b'testes', b'test', b'testes'], funbox.decode_from_bin(test_data))
         self.assertEqual(['test', 'testes', 'test', 'testes'], funbox.decode_from_bin(test_data))
 
+    def test_get_links_from_set(self):
+        links = [
+                    b"yahoo.com/test",
+                    b"https://google.com/?dev=test",
+                    b"www.ya.com/test?get=id",
+                    b"https://www.ya.com/test?get=id",
+                    b"https://example.com/?test"
+                ]
+
+        from_time = int(time.time())
+        to_time = int(time.time()) + 1
+        for _time in range(from_time, to_time):
+            for key, link in enumerate(links):
+                self.redis_test.sadd(f'time:{_time}:links', link)
+
+        self.assertEqual(sorted(funbox.get_links_from_set(from_time, to_time)), sorted(links))
+        self.assertEqual(sorted(funbox.get_links_from_set(None, None)), sorted([]))
+
 
     def test_get_domain_from_url(self):
         links = [
@@ -28,6 +46,7 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
                 "https://www.ya.com/test?get=id",
                 "https://example.com/?test"
                 ]
+
         domains = [
                 "yahoo.com",
                 "google.com",
@@ -51,15 +70,6 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
 
 
         self.assertEqual('ok', funbox.put_links_in_set(request_time, links))
-
-    def test_filter_link_by_date(self):
-        links = [
-                "yahoo.com/test",
-                "https://google.com/?dev=test",
-                "www.ya.com/test?get=id",
-                "https://www.ya.com/test?get=id",
-                "https://example.com/?test"
-                ]
 
     def test_VisitedLinks_pure_post(self):
         url = self.domain + "visited_links"
@@ -122,6 +132,7 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
                     ],
                 "status": "ok"
                 }
+
         test_json_response_second = {
                 "domains": [
                     "badoo.com",
