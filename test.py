@@ -1,23 +1,21 @@
 import unittest
-import requests
 import json
-import funbox
 import time
+import app, models, resources, utils
 
-class FunboxEmptyDBTestCase(unittest.TestCase):
-
+class emptyDBTestCase(unittest.TestCase):
     def setUp(self):
-        self.redis_test = funbox.FlaskRedis(funbox.app)
+        self.redis_test = app.FlaskRedis(app.app)
         self.domain = "http://127.0.0.1:5000/"
-        self.app = funbox.app.test_client()
+        self.app = app.app.test_client()
 
     def tearDown(self):
         self.redis_test.flushall()
 
     def test_decode_from_bin(self):
         test_data = [b'test', b'testes', b'test', b'testes']
-        self.assertNotEqual([b'test', b'testes', b'test', b'testes'], funbox.decode_from_bin(test_data))
-        self.assertEqual(['test', 'testes', 'test', 'testes'], funbox.decode_from_bin(test_data))
+        self.assertNotEqual([b'test', b'testes', b'test', b'testes'], utils.decode_from_bin(test_data))
+        self.assertEqual(['test', 'testes', 'test', 'testes'], utils.decode_from_bin(test_data))
 
     def test_get_links_from_set(self):
         links = [
@@ -34,8 +32,8 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
             for key, link in enumerate(links):
                 self.redis_test.sadd(f'time:{_time}:links', link)
 
-        self.assertEqual(sorted(funbox.get_links_from_set(from_time, to_time)), sorted(links))
-        self.assertEqual(sorted(funbox.get_links_from_set(None, None)), sorted([]))
+        self.assertEqual(sorted(models.get_links_from_set(from_time, to_time)), sorted(links))
+        self.assertEqual(sorted(models.get_links_from_set(None, None)), sorted([]))
 
 
     def test_get_domain_from_url(self):
@@ -56,7 +54,7 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
                 ]
         test_cases = zip(domains, links)
         for domain, link in test_cases:
-            self.assertEqual(domain, funbox.get_domain_from_url(link))
+            self.assertEqual(domain, utils.get_domain_from_url(link))
 
     def test_put_links_in_set(self):
         links = [
@@ -69,7 +67,7 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
         request_time = int(time.time())
 
 
-        self.assertEqual('ok', funbox.put_links_in_set(request_time, links))
+        self.assertEqual('ok', models.put_links_in_set(request_time, links))
 
     def test_VisitedLinks_pure_post(self):
         url = self.domain + "visited_links"
@@ -128,19 +126,15 @@ class FunboxEmptyDBTestCase(unittest.TestCase):
                     "example.com",
                     "google.com",
                     "ya.com",
-                    "yahoo.com"
                     ],
                 "status": "ok"
                 }
 
         test_json_response_second = {
                 "domains": [
-                    "badoo.com",
                     "example.com",
                     "google.com",
-                    "inoco.com",
                     "ya.com",
-                    "yahoo.com"
                     ],
                 "status": "ok"
                 }

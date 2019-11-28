@@ -9,24 +9,3 @@ services:
         network_mode: host
         ports:
             - 6379:6379
-
-    _test:
-        build: flask/
-        volumes:
-            - ./funbox:/app
-        network_mode: host
-        command: python -m unittest
-        ports:
-            - 5000:5000
-        depends_on:
-            - db
-    prod:
-        build: flask/
-        volumes:
-            - ./funbox:/app
-        network_mode: host
-        command: python funbox.py
-        ports:
-            - 5000:5000
-        depends_on:
-            - _test
