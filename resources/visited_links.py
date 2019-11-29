@@ -3,10 +3,10 @@ from flask_restful import reqparse, Resource
 import time
 import validators
 
-from models import put_links_in_set
 
 class VisitedLinks(Resource):
     def post(self):
+        from models import put_links_in_set
         links = request.json["links"]
         validated_links = filter(
             lambda link: validators.url(link) == True, links)
